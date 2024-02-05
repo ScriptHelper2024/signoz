@@ -1,6 +1,6 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, Col, Row } from 'antd';
-import { MAX_FORMULAS, MAX_QUERIES } from 'constants/queryBuilder';
+import { MAX_FORMULAS, MAX_QUERIES, PANEL_TYPES } from 'constants/queryBuilder';
 // ** Hooks
 import { useQueryBuilder } from 'hooks/queryBuilder/useQueryBuilder';
 // ** Constants
@@ -65,70 +65,84 @@ export const QueryBuilder = memo(function QueryBuilder({
 	);
 
 	return (
-		<Row style={{ width: '100%' }} gutter={[0, 20]} justify="start">
-			<Col span={24}>
-				<Row gutter={[0, 50]}>
-					{currentQuery.builder.queryData.map((query, index) => (
-						<Col key={query.queryName} span={24}>
-							<Query
-								index={index}
-								isAvailableToDisable={isAvailableToDisableQuery}
-								queryVariant={config?.queryVariant || 'dropdown'}
-								query={query}
-								filterConfigs={filterConfigs}
-								queryComponents={queryComponents}
-							/>
-						</Col>
-					))}
-					{currentQuery.builder.queryFormulas.map((formula, index) => {
-						const isAllMetricDataSource = currentQuery.builder.queryData.every(
-							(query) => query.dataSource === DataSource.METRICS,
-						);
+		<>
+			{panelType === PANEL_TYPES.LIST && (
+				<Query
+					index={0}
+					isAvailableToDisable={isAvailableToDisableQuery}
+					queryVariant="static"
+					query={currentQuery.builder.queryData[0]}
+					filterConfigs={filterConfigs}
+					queryComponents={queryComponents}
+				/>
+			)}
+			{panelType !== PANEL_TYPES.LIST && (
+				<Row style={{ width: '100%' }} gutter={[0, 20]} justify="start">
+					<Col span={24}>
+						<Row gutter={[0, 50]}>
+							{currentQuery.builder.queryData.map((query, index) => (
+								<Col key={query.queryName} span={24}>
+									<Query
+										index={index}
+										isAvailableToDisable={isAvailableToDisableQuery}
+										queryVariant={config?.queryVariant || 'dropdown'}
+										query={query}
+										filterConfigs={filterConfigs}
+										queryComponents={queryComponents}
+									/>
+								</Col>
+							))}
+							{currentQuery.builder.queryFormulas.map((formula, index) => {
+								const isAllMetricDataSource = currentQuery.builder.queryData.every(
+									(query) => query.dataSource === DataSource.METRICS,
+								);
 
-						const query =
-							currentQuery.builder.queryData[index] ||
-							currentQuery.builder.queryData[0];
+								const query =
+									currentQuery.builder.queryData[index] ||
+									currentQuery.builder.queryData[0];
 
-						return (
-							<Col key={formula.queryName} span={24}>
-								<Formula
-									filterConfigs={filterConfigs}
-									query={query}
-									isAdditionalFilterEnable={isAllMetricDataSource}
-									formula={formula}
-									index={index}
-								/>
+								return (
+									<Col key={formula.queryName} span={24}>
+										<Formula
+											filterConfigs={filterConfigs}
+											query={query}
+											isAdditionalFilterEnable={isAllMetricDataSource}
+											formula={formula}
+											index={index}
+										/>
+									</Col>
+								);
+							})}
+						</Row>
+					</Col>
+
+					<Col span={24}>
+						<Row gutter={[20, 0]}>
+							<Col>
+								<Button
+									disabled={isDisabledQueryButton}
+									type="primary"
+									icon={<PlusOutlined />}
+									onClick={addNewBuilderQuery}
+								>
+									Query
+								</Button>
 							</Col>
-						);
-					})}
-				</Row>
-			</Col>
-
-			<Col span={24}>
-				<Row gutter={[20, 0]}>
-					<Col>
-						<Button
-							disabled={isDisabledQueryButton}
-							type="primary"
-							icon={<PlusOutlined />}
-							onClick={addNewBuilderQuery}
-						>
-							Query
-						</Button>
+							<Col>
+								<Button
+									disabled={isDisabledFormulaButton}
+									onClick={addNewFormula}
+									type="primary"
+									icon={<PlusOutlined />}
+								>
+									Formula
+								</Button>
+							</Col>
+							{actions}
+						</Row>
 					</Col>
-					<Col>
-						<Button
-							disabled={isDisabledFormulaButton}
-							onClick={addNewFormula}
-							type="primary"
-							icon={<PlusOutlined />}
-						>
-							Formula
-						</Button>
-					</Col>
-					{actions}
 				</Row>
-			</Col>
-		</Row>
+			)}
+		</>
 	);
 });
