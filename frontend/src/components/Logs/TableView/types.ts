@@ -22,6 +22,7 @@ export type UseTableViewProps = {
 	appendTo?: 'center' | 'end';
 	onOpenLogsContext?: (log: ILog) => void;
 	onClickExpand?: (log: ILog) => void;
+	isDashboardPanel?: boolean;
 } & LogsTableViewProps;
 
 export type ActionsColumnProps = {

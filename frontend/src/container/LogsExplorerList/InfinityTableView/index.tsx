@@ -57,7 +57,13 @@ const CustomTableRow: TableComponents<ILog>['TableRow'] = ({
 
 const InfinityTable = forwardRef<TableVirtuosoHandle, InfinityTableProps>(
 	function InfinityTableView(
-		{ isLoading, tableViewProps, infitiyTableProps },
+		{
+			isLoading,
+			tableViewProps,
+			infitiyTableProps,
+			isTableHeaderDraggable = true,
+			isDashboardPanel = false,
+		},
 		ref,
 	): JSX.Element | null {
 		const {
@@ -76,17 +82,21 @@ const InfinityTable = forwardRef<TableVirtuosoHandle, InfinityTableProps>(
 			...tableViewProps,
 			onClickExpand: onSetActiveLog,
 			onOpenLogsContext: handleSetActiveContextLog,
+			isDashboardPanel,
 		});
+
 		const { draggedColumns, onDragColumns } = useDragColumns<
 			Record<string, unknown>
 		>(LOCALSTORAGE.LOGS_LIST_COLUMNS);
 
 		const isDarkMode = useIsDarkMode();
 
-		const tableColumns = useMemo(
-			() => getDraggedColumns<Record<string, unknown>>(columns, draggedColumns),
-			[columns, draggedColumns],
-		);
+		const tableColumns = useMemo(() => {
+			if (isDashboardPanel) {
+				return columns;
+			}
+			return getDraggedColumns<Record<string, unknown>>(columns, draggedColumns);
+		}, [columns, draggedColumns, isDashboardPanel]);
 
 		const handleDragEnd = useCallback(
 			(fromIndex: number, toIndex: number) =>
@@ -141,7 +151,8 @@ const InfinityTable = forwardRef<TableVirtuosoHandle, InfinityTableProps>(
 								$isDragColumn={isDragColumn}
 								key={column.key}
 								// eslint-disable-next-line react/jsx-props-no-spreading
-								{...(isDragColumn && { className: 'dragHandler' })}
+								{...(isDragColumn &&
+									isTableHeaderDraggable && { className: 'dragHandler' })}
 							>
 								{column.title as string}
 							</TableHeaderCellStyled>
@@ -149,7 +160,7 @@ const InfinityTable = forwardRef<TableVirtuosoHandle, InfinityTableProps>(
 					})}
 				</tr>
 			),
-			[tableColumns, isDarkMode],
+			[tableColumns, isDarkMode, isTableHeaderDraggable],
 		);
 
 		return (

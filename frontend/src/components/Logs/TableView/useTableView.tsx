@@ -13,7 +13,11 @@ import { FlatLogData } from 'lib/logs/flatLogData';
 import { useCallback, useMemo } from 'react';
 
 import { ExpandIconWrapper } from '../RawLogView/styles';
-import { defaultCellStyle, defaultTableStyle } from './config';
+import {
+	defaultCellStyle,
+	defaultIsDashboardPanelStyle,
+	defaultTableStyle,
+} from './config';
 import { TableBodyContent } from './styles';
 import {
 	ActionsColumnProps,
@@ -62,6 +66,7 @@ export const useTableView = (props: UseTableViewProps): UseTableViewResult => {
 		appendTo = 'center',
 		onOpenLogsContext,
 		onClickExpand,
+		isDashboardPanel,
 	} = props;
 	const { isLogsExplorerPage } = useCopyLogLink();
 
@@ -87,7 +92,9 @@ export const useTableView = (props: UseTableViewProps): UseTableViewResult => {
 				key: name,
 				render: (field): ColumnTypeRender<Record<string, unknown>> => ({
 					props: {
-						style: defaultCellStyle,
+						style: isDashboardPanel
+							? defaultIsDashboardPanelStyle
+							: defaultTableStyle,
 					},
 					children: (
 						<Typography.Paragraph ellipsis={{ rows: linesPerRow }}>
@@ -96,6 +103,32 @@ export const useTableView = (props: UseTableViewProps): UseTableViewResult => {
 					),
 				}),
 			}));
+
+		if (isDashboardPanel) {
+			return [
+				{
+					title: '',
+					dataIndex: 'id',
+					key: 'expand',
+					// https://github.com/ant-design/ant-design/discussions/36886
+					render: (_, item, index): ColumnTypeRender<Record<string, unknown>> => ({
+						props: {
+							style: defaultCellStyle,
+						},
+						children: (
+							<ExpandIconWrapper
+								onClick={(): void => {
+									handleClickExpand(index);
+								}}
+							>
+								<ExpandAltOutlined />
+							</ExpandIconWrapper>
+						),
+					}),
+				},
+				...fieldColumns,
+			];
+		}
 
 		return [
 			{
@@ -173,12 +206,13 @@ export const useTableView = (props: UseTableViewProps): UseTableViewResult => {
 				: []),
 		];
 	}, [
-		logs,
 		fields,
+		isDashboardPanel,
 		appendTo,
-		linesPerRow,
 		isLogsExplorerPage,
+		linesPerRow,
 		handleClickExpand,
+		logs,
 		onOpenLogsContext,
 	]);
 
