@@ -18,6 +18,7 @@ export const QueryBuilder = memo(function QueryBuilder({
 	actions,
 	filterConfigs = {},
 	queryComponents,
+	isDashboardPanel = false,
 }: QueryBuilderProps): JSX.Element {
 	const {
 		currentQuery,
@@ -66,7 +67,7 @@ export const QueryBuilder = memo(function QueryBuilder({
 
 	return (
 		<>
-			{panelType === PANEL_TYPES.LIST && (
+			{panelType === PANEL_TYPES.LIST && isDashboardPanel && (
 				<Query
 					index={0}
 					isAvailableToDisable={isAvailableToDisableQuery}
@@ -74,9 +75,10 @@ export const QueryBuilder = memo(function QueryBuilder({
 					query={currentQuery.builder.queryData[0]}
 					filterConfigs={filterConfigs}
 					queryComponents={queryComponents}
+					isExplorerPanel
 				/>
 			)}
-			{panelType !== PANEL_TYPES.LIST && (
+			{!isDashboardPanel && (
 				<Row style={{ width: '100%' }} gutter={[0, 20]} justify="start">
 					<Col span={24}>
 						<Row gutter={[0, 50]}>

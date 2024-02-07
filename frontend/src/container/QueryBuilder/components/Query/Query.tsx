@@ -37,6 +37,7 @@ export const Query = memo(function Query({
 	query,
 	filterConfigs,
 	queryComponents,
+	isExplorerPanel = false,
 }: QueryProps): JSX.Element {
 	const { panelType } = useQueryBuilder();
 	const {
@@ -317,7 +318,7 @@ export const Query = memo(function Query({
 					</Col>
 				</Row>
 			</Col>
-			{!isMetricsDataSource && (
+			{!isMetricsDataSource && !isExplorerPanel && (
 				<Col span={11}>
 					<Row gutter={[11, 5]}>
 						<Col flex="5.93rem">
@@ -339,33 +340,42 @@ export const Query = memo(function Query({
 					</Row>
 				</Col>
 			)}
-			<Col span={11} offset={isMetricsDataSource ? 0 : 2}>
-				<Row gutter={[11, 5]}>
-					<Col flex="5.93rem">
-						<FilterLabel
-							label={panelType === PANEL_TYPES.VALUE ? 'Reduce to' : 'Group by'}
-						/>
-					</Col>
-					<Col flex="1 1 12.5rem">
-						{panelType === PANEL_TYPES.VALUE ? (
-							<ReduceToFilter query={query} onChange={handleChangeReduceTo} />
-						) : (
-							<GroupByFilter
-								disabled={isMetricsDataSource && !query.aggregateAttribute.key}
-								query={query}
-								onChange={handleChangeGroupByKeys}
+			{!isExplorerPanel && (
+				<Col span={11} offset={isMetricsDataSource ? 0 : 2}>
+					<Row gutter={[11, 5]}>
+						<Col flex="5.93rem">
+							<FilterLabel
+								label={panelType === PANEL_TYPES.VALUE ? 'Reduce to' : 'Group by'}
 							/>
-						)}
-					</Col>
-				</Row>
-			</Col>
-			{!isTracePanelType && (
+						</Col>
+						<Col flex="1 1 12.5rem">
+							{panelType === PANEL_TYPES.VALUE ? (
+								<ReduceToFilter query={query} onChange={handleChangeReduceTo} />
+							) : (
+								<GroupByFilter
+									disabled={isMetricsDataSource && !query.aggregateAttribute.key}
+									query={query}
+									onChange={handleChangeGroupByKeys}
+								/>
+							)}
+						</Col>
+					</Row>
+				</Col>
+			)}
+			{!isTracePanelType && !isExplorerPanel && (
 				<Col span={24}>
 					<AdditionalFiltersToggler listOfAdditionalFilter={listOfAdditionalFilters}>
 						<Row gutter={[0, 11]} justify="space-between">
 							{renderAdditionalFilters()}
 						</Row>
 					</AdditionalFiltersToggler>
+				</Col>
+			)}
+			{isExplorerPanel && (
+				<Col span={24}>
+					<Row gutter={[0, 11]} justify="space-between">
+						{renderAdditionalFilters()}
+					</Row>
 				</Col>
 			)}
 			{panelType !== PANEL_TYPES.LIST && panelType !== PANEL_TYPES.TRACE && (

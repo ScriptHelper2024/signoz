@@ -17,6 +17,7 @@ export const useGetExplorerQueryRange = (
 	panelType: PANEL_TYPES | null,
 	options?: UseQueryOptions<SuccessResponse<MetricRangePayloadProps>, Error>,
 	params?: Record<string, unknown>,
+	isDashboardPanel?: boolean,
 ): UseQueryResult<SuccessResponse<MetricRangePayloadProps>, Error> => {
 	const { isEnabledQuery } = useQueryBuilder();
 	const { selectedTime: globalSelectedInterval, minTime, maxTime } = useSelector<
@@ -50,7 +51,7 @@ export const useGetExplorerQueryRange = (
 			...options,
 			retry: false,
 			queryKey: [key, globalSelectedInterval, requestData, minTime, maxTime],
-			enabled: isEnabled,
+			enabled: isEnabled || isDashboardPanel,
 		},
 	);
 };
