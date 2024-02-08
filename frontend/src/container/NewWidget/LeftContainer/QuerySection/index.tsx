@@ -1,6 +1,10 @@
 import { Button, Tabs, Typography } from 'antd';
 import TextToolTip from 'components/TextToolTip';
 import { PANEL_TYPES } from 'constants/queryBuilder';
+import {
+	listViewInitialLogQuery,
+	listViewInitialTraceQuery,
+} from 'container/NewDashboard/ComponentsSlider/constants';
 import { WidgetGraphProps } from 'container/NewWidget/types';
 import { QueryBuilder } from 'container/QueryBuilder';
 import { QueryBuilderProps } from 'container/QueryBuilder/QueryBuilder.interfaces';
@@ -31,7 +35,6 @@ import PromQLQueryContainer from './QueryBuilder/promQL';
 function QuerySection({
 	selectedGraph,
 	selectedTime,
-	isDashboardPanel = false,
 }: QueryProps): JSX.Element {
 	const { currentQuery, redirectWithQueryBuilderData } = useQueryBuilder();
 	const urlQuery = useUrlQuery();
@@ -99,6 +102,9 @@ function QuerySection({
 				},
 			});
 
+			console.log({ updatedQuery });
+			console.log({ selectedWidget });
+
 			redirectWithQueryBuilderData(updatedQuery);
 		},
 		[
@@ -112,10 +118,23 @@ function QuerySection({
 	);
 
 	const handleQueryCategoryChange = (qCategory: string): void => {
-		const currentQueryType = qCategory as EQueryType;
+		const currentQueryType = qCategory;
+		console.log({ currentQueryType });
+
+		if (selectedGraph === PANEL_TYPES.LIST) {
+			if (currentQueryType === DataSource.LOGS) {
+				handleStageQuery(listViewInitialLogQuery);
+			} else {
+				handleStageQuery(listViewInitialTraceQuery);
+			}
+			return;
+		}
 
 		featureResponse.refetch().then(() => {
-			handleStageQuery({ ...currentQuery, queryType: currentQueryType });
+			handleStageQuery({
+				...currentQuery,
+				queryType: currentQueryType as EQueryType,
+			});
 		});
 	};
 
@@ -131,7 +150,7 @@ function QuerySection({
 		return config;
 	}, []);
 
-	const listFilterConfigs: QueryBuilderProps['filterConfigs'] = useMemo(() => {
+	const listViewLogFilterConfigs: QueryBuilderProps['filterConfigs'] = useMemo(() => {
 		const config: QueryBuilderProps['filterConfigs'] = {
 			stepInterval: { isHidden: true, isDisabled: true },
 			having: { isHidden: true, isDisabled: true },
@@ -140,18 +159,44 @@ function QuerySection({
 		return config;
 	}, []);
 
+	const listViewTracesFilterConfigs: QueryBuilderProps['filterConfigs'] = useMemo(() => {
+		const config: QueryBuilderProps['filterConfigs'] = {
+			stepInterval: { isHidden: true, isDisabled: true },
+			having: { isHidden: true, isDisabled: true },
+			limit: { isHidden: true, isDisabled: true },
+		};
+
+		return config;
+	}, []);
+
 	const listItems = [
 		{
-			key: EQueryType.QUERY_BUILDER,
+			key: DataSource.LOGS,
 			label: 'Logs',
 			tab: <Typography>Log</Typography>,
 			children: (
 				<QueryBuilder
 					panelType={PANEL_TYPES.LIST}
-					filterConfigs={listFilterConfigs}
+					filterConfigs={listViewLogFilterConfigs}
 					isDashboardPanel
 					config={{
 						initialDataSource: DataSource.LOGS,
+						queryVariant: 'static',
+					}}
+				/>
+			),
+		},
+		{
+			key: DataSource.TRACES,
+			label: 'Traces',
+			tab: <Typography>Traces</Typography>,
+			children: (
+				<QueryBuilder
+					panelType={PANEL_TYPES.LIST}
+					filterConfigs={listViewTracesFilterConfigs}
+					isDashboardPanel
+					config={{
+						initialDataSource: DataSource.TRACES,
 						queryVariant: 'static',
 					}}
 				/>
@@ -182,12 +227,23 @@ function QuerySection({
 		},
 	];
 
+	console.log({ activeKey: currentQuery.builder.queryData[0].dataSource });
+	console.log({ currentQuery });
+
 	return (
 		<Tabs
 			type="card"
 			style={{ width: '100%' }}
-			defaultActiveKey={currentQuery.queryType}
-			activeKey={currentQuery.queryType}
+			defaultActiveKey={
+				selectedGraph !== PANEL_TYPES.EMPTY_WIDGET
+					? currentQuery.queryType
+					: currentQuery.builder.queryData[0].dataSource
+			}
+			activeKey={
+				selectedGraph !== PANEL_TYPES.LIST
+					? currentQuery.queryType
+					: currentQuery.builder.queryData[0].dataSource
+			}
 			onChange={handleQueryCategoryChange}
 			tabBarExtraContent={
 				<span style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
@@ -201,9 +257,7 @@ function QuerySection({
 					</Button>
 				</span>
 			}
-			items={
-				selectedGraph === PANEL_TYPES.LIST && isDashboardPanel ? listItems : items
-			}
+			items={selectedGraph === PANEL_TYPES.LIST ? listItems : items}
 		/>
 	);
 }
@@ -211,7 +265,6 @@ function QuerySection({
 interface QueryProps {
 	selectedGraph: PANEL_TYPES;
 	selectedTime: WidgetGraphProps['selectedTime'];
-	isDashboardPanel: boolean;
 }
 
 export default QuerySection;
