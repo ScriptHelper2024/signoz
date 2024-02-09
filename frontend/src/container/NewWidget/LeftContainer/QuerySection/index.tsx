@@ -173,11 +173,7 @@ function QuerySection({
 				<QueryBuilder
 					panelType={PANEL_TYPES.LIST}
 					filterConfigs={listViewLogFilterConfigs}
-					isDashboardPanel
-					// config={{
-					// 	initialDataSource: DataSource.LOGS,
-					// 	queryVariant: 'static',
-					// }}
+					isExplorerPanel
 				/>
 			),
 		},
@@ -189,11 +185,7 @@ function QuerySection({
 				<QueryBuilder
 					panelType={PANEL_TYPES.LIST}
 					filterConfigs={listViewTracesFilterConfigs}
-					isDashboardPanel
-					// config={{
-					// 	initialDataSource: DataSource.TRACES,
-					// 	queryVariant: 'static',
-					// }}
+					isExplorerPanel
 				/>
 			),
 		},
@@ -227,7 +219,7 @@ function QuerySection({
 			type="card"
 			style={{ width: '100%' }}
 			defaultActiveKey={
-				selectedGraph !== PANEL_TYPES.EMPTY_WIDGET
+				selectedGraph !== PANEL_TYPES.LIST
 					? currentQuery.queryType
 					: currentQuery.builder.queryData[0].dataSource
 			}
