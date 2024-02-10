@@ -1,9 +1,11 @@
 import { RouteTabProps } from 'components/RouteTab/types';
 import { TFunction } from 'i18next';
-import { isCloudUser } from 'utils/app';
+import { ROLES, USER_ROLES } from 'types/roles';
+import { isCloudUser, isEECloudUser } from 'utils/app';
 
 import {
 	alertChannels,
+	apiKeys,
 	generalSettings,
 	generalSettingsCloud,
 	ingestionSettings,
@@ -11,6 +13,7 @@ import {
 } from './config';
 
 export const getRoutes = (
+	userRole: ROLES | null,
 	isCurrentOrgSettings: boolean,
 	t: TFunction,
 ): RouteTabProps['routes'] => {
@@ -27,6 +30,10 @@ export const getRoutes = (
 	} else {
 		settings.push(...alertChannels(t));
 		settings.push(...generalSettings(t));
+	}
+
+	if ((isCloudUser() || isEECloudUser()) && userRole === USER_ROLES.ADMIN) {
+		settings.push(...apiKeys(t));
 	}
 
 	return settings;
